@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Разбор глагола — тренажёр</title>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Geologica:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d0d0d;
+  --card: #161616;
+  --card2: #1c1c1c;
+  --border: #282828;
+  --accent: #c8f53b;
+  --accent2: #5b8fff;
+  --accent3: #ff6b6b;
+  --success: #3bdb7a;
+  --warning: #ffb347;
+  --text: #f0f0f0;
+  --muted: #555;
+  --muted2: #888;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Geologica', sans-serif;
+  font-weight: 300;
+  min-height: 100vh;
+  padding: 40px 20px 80px;
+}
+.container { max-width: 680px; margin: 0 auto; }
+
+/* HEADER */
+.label {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+h1 {
+  font-family: 'Unbounded', sans-serif;
+  font-size: clamp(20px, 5vw, 32px);
+  font-weight: 900;
+  line-height: 1.1;
+  margin-bottom: 8px;
+}
+h1 span { color: var(--accent); }
+.subtitle { color: var(--muted2); font-size: 13px; margin-bottom: 32px; line-height: 1.6; }
+
+/* PROGRESS */
+.progress-wrap { margin-bottom: 28px; }
+.progress-meta {
+  display: flex; justify-content: space-between;
+  font-size: 11px; color: var(--muted); margin-bottom: 8px;
+  font-family: 'Unbounded', sans-serif;
+}
+.progress-meta span:last-child { color: var(--accent); }
+.progress-bar { height: 2px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--accent); transition: width 0.5s ease; }
+
+/* SCREEN */
+.screen { display: none; }
+.screen.active { display: block; animation: fadeUp 0.35s ease; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* INTRO */
+.intro-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 32px;
+}
+.intro-card h2 {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 18px; font-weight: 700;
+  margin-bottom: 12px;
+}
+.intro-card p {
+  font-size: 14px; color: var(--muted2); line-height: 1.7; margin-bottom: 24px;
+}
+.input-wrap { position: relative; margin-bottom: 16px; }
+.input-wrap input {
+  width: 100%;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 20px;
+  font-family: 'Geologica', sans-serif;
+  font-size: 22px;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.input-wrap input:focus { border-color: var(--accent); }
+.input-wrap input::placeholder { color: var(--muted); font-size: 16px; }
+.input-error { font-size: 12px; color: var(--accent3); margin-top: 6px; display: none; }
+
+/* STEP CARD */
+.step-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 28px;
+  margin-bottom: 12px;
+}
+.step-meta {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 20px;
+}
+.step-badge {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 9px; letter-spacing: 0.15em;
+  color: var(--bg);
+  background: var(--accent);
+  border-radius: 6px;
+  padding: 4px 10px;
+}
+.step-name {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 14px; font-weight: 700;
+  color: var(--text);
+}
+.step-question {
+  font-size: 15px; line-height: 1.7;
+  color: #ccc; margin-bottom: 6px;
+}
+.verb-highlight {
+  font-size: 28px; font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 20px;
+  letter-spacing: -0.02em;
+}
+
+/* HINT */
+.hint-toggle {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; color: var(--muted2);
+  cursor: pointer; margin-bottom: 16px;
+  user-select: none;
+  transition: color 0.2s;
+}
+.hint-toggle:hover { color: var(--accent); }
+.hint-toggle svg { width: 14px; height: 14px; }
+.hint-box {
+  background: #141a06;
+  border: 1px solid #2a3a10;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  font-size: 13px; color: #aaa; line-height: 1.7;
+  display: none;
+}
+.hint-box em { color: var(--accent); font-style: normal; font-weight: 500; }
+.hint-box.visible { display: block; animation: fadeUp 0.2s ease; }
+
+/* OPTIONS */
+.options { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.opt {
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-size: 14px; color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+  user-select: none;
+}
+.opt:hover { border-color: var(--accent); color: var(--accent); }
+.opt.selected { border-color: var(--accent); background: #1a2206; color: var(--accent); }
+.opt.disabled { pointer-events: none; opacity: 0.4; }
+
+/* TEXT INPUT STEP */
+.step-input {
+  width: 100%;
+  background: var(--card2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-family: 'Geologica', sans-serif;
+  font-size: 16px; color: var(--text);
+  outline: none; margin-bottom: 16px;
+  transition: border-color 0.2s;
+}
+.step-input:focus { border-color: var(--accent); }
+.step-input::placeholder { color: var(--muted); }
+
+/* SKIP NOTE */
+.skip-note {
+  font-size: 12px; color: var(--muted2);
+  background: var(--card2);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+.skip-note em { color: var(--warning); font-style: normal; }
+
+/* BUTTONS */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-family: 'Unbounded', sans-serif;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 0.05em;
+  cursor: pointer; border: none;
+  transition: opacity 0.2s, transform 0.1s;
+}
+.btn:hover { opacity: 0.85; }
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: var(--accent); color: #0d0d0d; }
+.btn-secondary { background: var(--card2); color: var(--text); border: 1px solid var(--border); }
+.btn-skip { background: transparent; color: var(--muted2); border: 1px solid var(--border); font-size: 11px; padding: 10px 18px; }
+
+.btn-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+/* RESULTS */
+.results-header {
+  text-align: center; padding: 32px 0 24px;
+}
+.results-header .big-score {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 64px; font-weight: 900;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.results-header .score-label {
+  font-size: 13px; color: var(--muted2);
+}
+.results-header .score-label span { color: var(--accent); }
+
+.result-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+.result-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px 20px;
+}
+.result-item.correct { border-color: #1f4a2e; }
+.result-item.wrong   { border-color: #4a1f1f; }
+.result-item.skipped { border-color: #3a3a20; opacity: 0.7; }
+
+.ri-top {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 8px;
+}
+.ri-step {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 9px; color: var(--muted2);
+  min-width: 24px;
+}
+.ri-name {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 12px; font-weight: 700; flex: 1;
+}
+.ri-icon { font-size: 16px; }
+
+.ri-row { display: flex; gap: 16px; font-size: 13px; line-height: 1.5; flex-wrap: wrap; }
+.ri-label { color: var(--muted2); min-width: 80px; }
+.ri-user { color: var(--text); }
+.ri-correct-val { color: var(--success); }
+.ri-wrong-val { color: var(--accent3); text-decoration: line-through; }
+.ri-explain { font-size: 12px; color: var(--muted2); margin-top: 6px; line-height: 1.6; }
+.ri-explain em { color: var(--accent); font-style: normal; }
+
+.parse-final {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
+}
+.parse-final-title {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 11px; letter-spacing: 0.15em;
+  color: var(--accent2); text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.parse-sentence {
+  font-size: 22px; margin-bottom: 16px;
+  line-height: 1.5;
+}
+.parse-sentence strong { color: var(--accent); border-bottom: 2px solid var(--accent); }
+.parse-rows { display: flex; flex-direction: column; gap: 6px; }
+.parse-row {
+  display: flex; gap: 12px; font-size: 13px; line-height: 1.5;
+  padding: 6px 0; border-bottom: 1px solid #1e1e1e;
+  align-items: baseline;
+}
+.parse-row:last-child { border-bottom: none; }
+.pr-num { font-family: 'Unbounded', sans-serif; font-size: 9px; color: var(--muted); min-width: 20px; }
+.pr-key { color: var(--muted2); min-width: 130px; flex-shrink: 0; }
+.pr-val { font-weight: 500; }
+.pr-val.ok { color: var(--success); }
+.pr-val.err { color: var(--accent3); }
+.pr-val.skip { color: var(--muted); font-style: italic; }
+
+/* TEXTBOOK PARSE */
+.textbook-block {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 28px 32px;
+  margin-bottom: 20px;
+  font-family: 'PT Serif', Georgia, serif;
+}
+.textbook-label {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 9px; letter-spacing: 0.15em;
+  color: var(--accent); text-transform: uppercase;
+  margin-bottom: 20px;
+}
+.textbook-line {
+  font-size: 15px; line-height: 1.9;
+  color: #ddd;
+}
+.textbook-line.line1 {
+  font-size: 17px; font-weight: 600;
+  color: var(--text); margin-bottom: 4px;
+}
+.textbook-line.line2 { margin-bottom: 4px; }
+.textbook-line.line3 { font-weight: 600; color: var(--text); margin-bottom: 2px; }
+.textbook-line.line4 { padding-left: 20px; }
+.textbook-line.line5 { padding-left: 20px; margin-bottom: 4px; }
+.textbook-line.line6 { font-weight: 500; color: var(--text); }
+.textbook-line u { text-underline-offset: 3px; text-decoration-color: var(--text); }
+
+/* colour wrong parts in textbook */
+.textbook-line .wrong-part {
+  color: var(--accent3);
+  text-decoration: line-through;
+  text-decoration-color: var(--accent3);
+}
+.textbook-line .correct-part {
+  color: var(--success);
+}
+
+.loading-overlay {
+  position: fixed; inset: 0;
+  background: rgba(13,13,13,0.85);
+  display: none;
+  align-items: center; justify-content: center;
+  z-index: 100;
+  flex-direction: column; gap: 16px;
+}
+.loading-overlay.active { display: flex; }
+.spinner {
+  width: 36px; height: 36px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-family: 'Unbounded', sans-serif; font-size: 11px; color: var(--muted2); letter-spacing: 0.1em; }
+
+footer { margin-top: 48px; text-align: center; font-size: 12px; color: var(--muted); }
+footer span { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="label">6 класс · Морфология</div>
+  <h1>Тренажёр<br><span>разбора глагола</span></h1>
+  <p class="subtitle">Введи глагол — и разбери его шаг за шагом. В финале получишь проверку.</p>
+
+  <div class="progress-wrap">
+    <div class="progress-meta">
+      <span id="progressLabel">Шаг 0 из 12</span>
+      <span id="progressPct">0%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  </div>
+
+  <!-- SCREEN 0: INTRO -->
+  <div class="screen active" id="screen-intro">
+    <div class="intro-card">
+      <h2>Введи глагол</h2>
+      <p>Напиши любой глагол в той форме, в которой он встретился тебе в тексте — или придумай свой.</p>
+      <div class="input-wrap">
+        <input type="text" id="verbInput" placeholder="например: улыбнулась" autocomplete="off" spellcheck="false">
+        <div class="input-error" id="verbError">Введи глагол, чтобы продолжить</div>
+      </div>
+      <button class="btn btn-primary" onclick="startParsing()">Начать разбор →</button>
+    </div>
+  </div>
+
+  <!-- SCREEN 1: STEPS -->
+  <div class="screen" id="screen-steps"></div>
+
+  <!-- SCREEN 2: RESULTS -->
+  <div class="screen" id="screen-results"></div>
+
+  <footer>Учитель <span>Пи</span> · volodinteacher.ru</footer>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">Проверяю разбор...</div>
+</div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────────
+const STEPS = [
+  {
+    id: 'infinitive',
+    name: 'Начальная форма',
+    question: 'Поставь глагол в инфинитив (начальную форму).',
+    type: 'text',
+    placeholder: 'например: читать',
+    hint: 'Задай вопрос: <em>что делать? / что сделать?</em> Убери окончания времени — останется основа + <em>-ть / -ти / -чь</em>. Пример: читал → читать, бежит → бежать, печёт → печь'
+  },
+  {
+    id: 'aspect',
+    name: 'Вид',
+    question: 'Определи вид глагола.',
+    type: 'options',
+    options: ['Совершенный', 'Несовершенный'],
+    hint: 'Задай вопрос к инфинитиву: <em>что делать?</em> → несовершенный (читать, думать). <em>Что сделать?</em> → совершенный (прочитать, подумать).'
+  },
+  {
+    id: 'transitivity',
+    name: 'Переходность',
+    question: 'Переходный или непереходный?',
+    type: 'options',
+    options: ['Переходный', 'Непереходный'],
+    hint: 'Можно ли поставить рядом существительное <em>без предлога в В.п.</em>? читать (что?) книгу → переходный. бежать (что?) ??? → непереходный. <em>Возвратные глаголы всегда непереходные.</em>'
+  },
+  {
+    id: 'reflexivity',
+    name: 'Возвратность',
+    question: 'Возвратный или невозвратный?',
+    type: 'options',
+    options: ['Возвратный', 'Невозвратный'],
+    hint: 'Есть суффикс <em>-ся / -сь</em>? Да → возвратный (улыбаться, одеться). Нет → невозвратный (читать, писать).'
+  },
+  {
+    id: 'conjugation',
+    name: 'Спряжение',
+    question: 'Определи спряжение глагола.',
+    type: 'options',
+    options: ['I спряжение', 'II спряжение'],
+    hint: '<em>II спряжение</em> — глаголы на -ить + 11 исключений: гнать, держать, смотреть, видеть, дышать, слышать, ненавидеть, зависеть, вертеть, обидеть, терпеть. Всё остальное — <em>I спряжение</em>. Если окончание ударное — смотри на окончание.'
+  },
+  {
+    id: 'impersonal',
+    name: 'Безличный?',
+    question: 'Этот глагол безличный?',
+    type: 'options',
+    options: ['Да, безличный', 'Нет, не безличный'],
+    hint: 'Можно ли подставить подлежащее <em>я / ты / он</em>? Светает, знобит, не спится — нельзя → безличный. Если можно подставить — не безличный.'
+  },
+  {
+    id: 'mood',
+    name: 'Наклонение',
+    question: 'Определи наклонение.',
+    type: 'options',
+    options: ['Изъявительное', 'Повелительное', 'Условное'],
+    hint: '<em>Изъявительное</em> — реальное действие: читал, читает. <em>Повелительное</em> — приказ или просьба: читай, читайте. <em>Условное</em> — с частицей <em>бы</em>: читал бы.'
+  },
+  {
+    id: 'tense',
+    name: 'Время',
+    question: 'Определи время (только для изъявительного наклонения).',
+    type: 'options',
+    options: ['Прошедшее', 'Настоящее', 'Будущее', 'Не определяется'],
+    hint: '<em>Прошедшее</em> — был суффикс -л-: читал, пришла. <em>Настоящее</em> — сейчас: читает, думаю. <em>Будущее</em> — будет читать / прочитает. В повелительном и условном — <em>не определяется</em>.'
+  },
+  {
+    id: 'number',
+    name: 'Число',
+    question: 'Единственное или множественное число?',
+    type: 'options',
+    options: ['Единственное', 'Множественное'],
+    hint: 'Один субъект или несколько? <em>он читал</em> → единственное. <em>они читали</em> → множественное.'
+  },
+  {
+    id: 'person',
+    name: 'Лицо',
+    question: 'Определи лицо (настоящее/будущее время; повелительное наклонение).',
+    type: 'options',
+    options: ['1-е лицо', '2-е лицо', '3-е лицо', 'Не определяется'],
+    hint: 'Подставь местоимение: <em>я / мы</em> → 1-е лицо. <em>ты / вы</em> → 2-е лицо. <em>он / она / они</em> → 3-е лицо. В прошедшем времени лицо <em>не определяется</em>.'
+  },
+  {
+    id: 'gender',
+    name: 'Род',
+    question: 'Определи род (прошедшее время ед. ч.; условное наклонение ед. ч.).',
+    type: 'options',
+    options: ['Мужской', 'Женский', 'Средний', 'Не определяется'],
+    hint: 'Смотри на окончание: <em>читал</em> → м. р. <em>читала</em> → ж. р. <em>читало</em> → ср. р. Во множественном числе род <em>не определяется</em>.'
+  },
+  {
+    id: 'syntax',
+    name: 'Синтаксическая роль',
+    question: 'Какова синтаксическая роль глагола в предложении?',
+    type: 'options',
+    options: ['Сказуемое', 'Подлежащее', 'Дополнение', 'Другое'],
+    hint: 'Глагол-сказуемое отвечает на вопрос <em>что делает подлежащее?</em> — подчеркни двумя чертами. Инфинитив может быть подлежащим или дополнением — смотри на контекст.'
+  }
+];
+
+// ─── STATE ──────────────────────────────────────────────────────────────────
+let verb = '';
+let currentStep = 0;
+let answers = {};
+let hintVisible = {};
+
+// ─── HELPERS ────────────────────────────────────────────────────────────────
+function updateProgress(step) {
+  const pct = Math.round(step / STEPS.length * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `Шаг ${step} из ${STEPS.length}`;
+  document.getElementById('progressPct').textContent = pct + '%';
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+}
+
+// ─── START ───────────────────────────────────────────────────────────────────
+document.getElementById('verbInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') startParsing();
+});
+
+function startParsing() {
+  const val = document.getElementById('verbInput').value.trim();
+  if (!val) {
+    document.getElementById('verbError').style.display = 'block';
+    return;
+  }
+  verb = val;
+  currentStep = 0;
+  answers = {};
+  hintVisible = {};
+  updateProgress(0);
+  renderStep(0);
+  showScreen('steps');
+}
+
+// ─── RENDER STEP ─────────────────────────────────────────────────────────────
+function renderStep(idx) {
+  const s = STEPS[idx];
+  const container = document.getElementById('screen-steps');
+
+  const hintId = `hint-${idx}`;
+  const hintOpen = hintVisible[idx] || false;
+
+  let inputHtml = '';
+  if (s.type === 'text') {
+    inputHtml = `<input class="step-input" id="stepInput-${idx}" type="text" placeholder="${s.placeholder}" autocomplete="off" spellcheck="false">`;
+  } else {
+    inputHtml = `<div class="options" id="options-${idx}">` +
+      s.options.map((o, i) =>
+        `<div class="opt" data-val="${o}" onclick="selectOpt(${idx}, this)">${o}</div>`
+      ).join('') +
+    `</div>`;
+  }
+
+  container.innerHTML = `
+    <div class="step-card">
+      <div class="step-meta">
+        <span class="step-badge">Шаг ${idx+1}</span>
+        <span class="step-name">${s.name}</span>
+      </div>
+      <div class="verb-highlight">${verb}</div>
+      <p class="step-question">${s.question}</p>
+      <div class="hint-toggle" onclick="toggleHint(${idx})">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        ${hintOpen ? 'Скрыть подсказку' : 'Показать подсказку'}
+      </div>
+      <div class="hint-box ${hintOpen ? 'visible' : ''}" id="${hintId}">${s.hint}</div>
+      ${inputHtml}
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="nextStep(${idx})">Дальше →</button>
+        ${idx > 0 ? `<button class="btn btn-skip" onclick="goBack(${idx})">← Назад</button>` : ''}
+      </div>
+    </div>
+  `;
+
+  // restore saved answer
+  if (s.type === 'text' && answers[s.id]) {
+    document.getElementById(`stepInput-${idx}`).value = answers[s.id];
+  }
+  if (s.type === 'options' && answers[s.id]) {
+    document.querySelectorAll(`#options-${idx} .opt`).forEach(o => {
+      if (o.dataset.val === answers[s.id]) o.classList.add('selected');
+    });
+  }
+
+  // enter key on text input
+  const inp = document.getElementById(`stepInput-${idx}`);
+  if (inp) inp.addEventListener('keydown', e => { if (e.key === 'Enter') nextStep(idx); });
+
+  updateProgress(idx);
+}
+
+function toggleHint(idx) {
+  hintVisible[idx] = !hintVisible[idx];
+  renderStep(idx);
+}
+
+function selectOpt(idx, el) {
+  document.querySelectorAll(`#options-${idx} .opt`).forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  answers[STEPS[idx].id] = el.dataset.val;
+}
+
+function nextStep(idx) {
+  const s = STEPS[idx];
+  if (s.type === 'text') {
+    const val = document.getElementById(`stepInput-${idx}`)?.value.trim();
+    if (!val) return;
+    answers[s.id] = val;
+  } else {
+    if (!answers[s.id]) {
+      // highlight
+      document.querySelectorAll(`#options-${idx} .opt`).forEach(o => {
+        o.style.borderColor = '#4a1f1f';
+      });
+      return;
+    }
+  }
+
+  currentStep = idx + 1;
+  if (currentStep >= STEPS.length) {
+    checkWithAI();
+  } else {
+    renderStep(currentStep);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function goBack(idx) {
+  currentStep = idx - 1;
+  renderStep(currentStep);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ─── AI CHECK ────────────────────────────────────────────────────────────────
+async function checkWithAI() {
+  showLoading('Нейросеть проверяет разбор...');
+
+  const answersText = STEPS.map(s =>
+    `${s.name}: ${answers[s.id] || '(не указано)'}`
+  ).join('\n');
+
+  const prompt = `Ты — строгий, но справедливый учитель русского языка. Ученик выполнил морфологический разбор глагола.
+
+Глагол: "${verb}"
+
+Ответы ученика:
+${answersText}
+
+Проверь каждый пункт разбора. Для каждого пункта дай:
+1. correct: true/false
+2. correctAnswer: правильный ответ (кратко)
+3. explanation: объяснение (1-2 предложения, если ошибка — объясни почему; если верно — подтверди коротко)
+
+Также дай:
+- totalScore: количество правильных ответов из 12
+- textbookParse: правильный разбор в формате школьного учебника — точно как в примере ниже. Используй те же сокращения и структуру:
+
+Пример (глагол "работай"):
+{
+  "line1": "Работай — глагол.",
+  "line2": "I. Обозначает действие (что делай?). Н. ф. — работать.",
+  "line3": "II. Морфолог. признаки:",
+  "line4": "пост.: несов. вид, неперех., невозвр., I спр.;",
+  "line5": "непост.: в повелит. накл., ед. ч., во 2-м лице.",
+  "line6": "III. (Что делай?) работай."
+}
+
+Используй стандартные сокращения: несов./сов. вид, перех./неперех., возвр./невозвр., спр., накл., накл., ч., лице, р.
+Если какой-то непостоянный признак не определяется (напр. время в повелит. накл.) — просто не включай его в line5.
+Синтаксическую роль в line6 оформляй с вопросом в скобках и подчёркиванием через HTML: <u>слово</u>
+
+- encouragement: короткая фраза-оценка (1 предложение, без лести)
+
+Отвечай ТОЛЬКО валидным JSON без markdown и без пояснений вне JSON:
+{
+  "results": {
+    "infinitive": {"correct": bool, "correctAnswer": "...", "explanation": "..."},
+    "aspect": {"correct": bool, "correctAnswer": "...", "explanation": "..."},
+    "transitivity": {"correct": bool, "correctAnswer": "...", "explanation": "..."},
+    "reflexivity": {"correct": bool, "correctAnswer": "...", "explanation": "..."},
+    "conjugation": {"correct": bool, "correctAnswer": "...", "explanation": "..."},
+    "impersonal": {"correct": bool, "correctAnswer": "...", "explanation": "..."},
+    "mood": {"correct": bool, "correctAnswer": "...", "explanation": "..."},
+    "tense": {"correct": bool, "correctAnswer": "...", "explanation": "..."},
+    "number": {"correct": bool, "correctAnswer": "...", "explanation": "..."},
+    "person": {"correct": bool, "correctAnswer": "...", "explanation": "..."},
+    "gender": {"correct": bool, "correctAnswer": "...", "explanation": "..."},
+    "syntax": {"correct": bool, "correctAnswer": "...", "explanation": "..."}
+  },
+  "totalScore": 0,
+  "textbookParse": {
+    "line1": "...",
+    "line2": "...",
+    "line3": "...",
+    "line4": "...",
+    "line5": "...",
+    "line6": "..."
+  },
+  "encouragement": "..."
+}`;
+
+  try {
+    const response = await fetch('/api/check', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await response.json();
+    const text = data.content.map(b => b.text || '').join('').trim();
+    const clean = text.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+    hideLoading();
+    renderResults(parsed);
+  } catch (e) {
+    hideLoading();
+    renderFallbackResults();
+  }
+}
+
+function showLoading(text) {
+  document.getElementById('loadingText').textContent = text;
+  document.getElementById('loadingOverlay').classList.add('active');
+}
+function hideLoading() {
+  document.getElementById('loadingOverlay').classList.remove('active');
+}
+
+// ─── RESULTS ─────────────────────────────────────────────────────────────────
+function renderResults(data) {
+  updateProgress(12);
+  const container = document.getElementById('screen-results');
+  const score = data.totalScore ?? 0;
+  const pct = Math.round(score / 12 * 100);
+
+  const scoreColor = pct >= 80 ? 'var(--success)' : pct >= 50 ? 'var(--warning)' : 'var(--accent3)';
+
+  let itemsHtml = STEPS.map(s => {
+    const r = data.results?.[s.id];
+    if (!r) return '';
+    const userAns = answers[s.id] || '—';
+    const isCorrect = r.correct;
+    const cls = isCorrect ? 'correct' : 'wrong';
+    const icon = isCorrect ? '✓' : '✗';
+    const iconColor = isCorrect ? 'var(--success)' : 'var(--accent3)';
+
+    return `
+      <div class="result-item ${cls}">
+        <div class="ri-top">
+          <span class="ri-step">${STEPS.indexOf(s)+1}</span>
+          <span class="ri-name">${s.name}</span>
+          <span class="ri-icon" style="color:${iconColor}">${icon}</span>
+        </div>
+        <div class="ri-row">
+          <span class="ri-label">Твой ответ:</span>
+          <span class="ri-user ${isCorrect ? 'ok' : 'err'}">${userAns}</span>
+        </div>
+        ${!isCorrect ? `<div class="ri-row"><span class="ri-label">Правильно:</span><span class="ri-correct-val">${r.correctAnswer}</span></div>` : ''}
+        <div class="ri-explain">${r.explanation}</div>
+      </div>
+    `;
+  }).join('');
+
+  // Textbook parse block
+  const tb = data.textbookParse || {};
+  const textbookHtml = tb.line1 ? `
+    <div class="textbook-block">
+      <div class="textbook-label">Правильный разбор — как в учебнике</div>
+      <div class="textbook-line line1">${tb.line1 || ''}</div>
+      <div class="textbook-line line2">${tb.line2 || ''}</div>
+      <div class="textbook-line line3">${tb.line3 || ''}</div>
+      <div class="textbook-line line4">${tb.line4 || ''}</div>
+      <div class="textbook-line line5">${tb.line5 || ''}</div>
+      <div class="textbook-line line6">${tb.line6 || ''}</div>
+    </div>
+  ` : '';
+
+  container.innerHTML = `
+    <div class="results-header">
+      <div class="big-score" style="color:${scoreColor}">${score}/12</div>
+      <div class="score-label">правильных ответов · <span>${pct}%</span></div>
+      <p style="margin-top:12px; font-size:14px; color:#aaa; font-style:italic">"${data.encouragement}"</p>
+    </div>
+
+    ${textbookHtml}
+
+    <div class="result-list">${itemsHtml}</div>
+
+    <div class="btn-row" style="justify-content:center">
+      <button class="btn btn-primary" onclick="restart()">Разобрать ещё один →</button>
+    </div>
+  `;
+
+  showScreen('results');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderFallbackResults() {
+  const container = document.getElementById('screen-results');
+  container.innerHTML = `
+    <div class="intro-card" style="text-align:center">
+      <h2>Не удалось получить проверку</h2>
+      <p style="margin: 12px 0 24px">Попробуй ещё раз — иногда соединение прерывается.</p>
+      <button class="btn btn-primary" onclick="checkWithAI()">Повторить проверку</button>
+    </div>
+  `;
+  showScreen('results');
+}
+
+function restart() {
+  document.getElementById('verbInput').value = '';
+  verb = ''; currentStep = 0; answers = {}; hintVisible = {};
+  updateProgress(0);
+  showScreen('intro');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
